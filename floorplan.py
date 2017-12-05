@@ -13,7 +13,7 @@ solution.txt will contain the result of the execution
 """
 
 # ensures compatibility with python2 and python3.
-# python2 raw_input() as been renamed as input() in python3.
+# python2 raw_input() has been renamed as input() in python3.
 try:
     input = raw_input
 except NameError:
@@ -48,6 +48,10 @@ CLBw, BRAMw, DSPw = [int(val) for val in input().split(' ')]
 # C = FPGA columns
 R, C = [int(val) for val in input().split(' ')]
 
+# TH = Tile height: the number of tiles contained within a clock region on the
+# vertical direction
+TH = int(input())
+
 # The FPGA matrix is composed of R rows and C columns.
 # Each entry/tile of the FPGA matrix is a single character with the following 
 # meaning:
@@ -79,26 +83,65 @@ fpgaValidRight = [int(val) for val in input().split(' ')]
 # N = number of regions to floorplan.
 N = int(input())
 
-# Reads the set of resources required by each region.
+# For each region, reads the following information:
+# 1) Region type, which is either 'P' (Partial Reconfigurable) or 'S' (Static)
+# 2) The set of resources required by each region
+# 3) The set of connections to IO ports on the FPGA
 #
-# creates the data structure 'regionsResourceRequirements' as a list of 
-# dictionaries so that the number of resources of type 't' required by region
-# 'n' can be retreived as:
+# To keep track of the regions' type, we create the following list:
+#
+# type = regionsType[n]
+# 
+# where n is the region id (in range [0, N-1]) and type is either 'P' or 'S'.
+#
+# To keep track of the regions' resource requirements, we create the 
+# data structure 'regionsResourceRequirements' as a list of dictionaries so that 
+# the number of resources of type 't' required by region 'n' can be retreived as:
 #
 # numRes = regionsResourceRequirements[n][t]
 #
 # Where t is either 'C' (CLB), 'B' (BRAM) or 'D' (DSP),
 # n is the region id (in range [0, N-1]) and numRes is the number of resources
 # of type t required by region n.
+#
+# Finaly, to keep track of the IO connections, we create the following lists:
+#
+# num = numIoConnections[n]
+# col = ioColumn[n][io]
+# row = ioRow[n][io]
+# wires = ioWires[n][io]
+#
+# Where: 
+# - n is the region id (in range [0, N-1])
+# - num is the number of io connections for region n
+# - col is the FPGA column index of the IO port
+# - row is the FPGA row index of the IO port
+# - wires are the number of wires connecting the region to the IO port
+regionsType = []
 regionsResourceRequirements = []
+numIoConnections = []
+ioColumn = []
+ioRow = []
+ioWires = []
 
 for n in range(N):
-	resources = [int(val) for val in input().split(' ')]
+	values = input().split(' ')
+
+	regionsType.append(values[0])
 	regionsResourceRequirements.append({
-		'C' : resources[0],
-		'B' : resources[1],
-		'D' : resources[2]
+		'C' : int(values[1]),
+		'B' : int(values[2]),
+		'D' : int(values[3])
 	})
+	numIo = int(values[4])
+	numIoConnections.append(numIo)
+
+	for io in range(numIo):
+		values = [int(el) for el in input().split(' ')]
+
+		ioColumn.append(values[0])
+		ioRow.append(values[1])
+		ioWires.append(values[2])
 
 # Reads the communication matrix.
 #
@@ -123,20 +166,30 @@ for n in range(N):
 floorplan = []
 
 # For this demo we use the following naive floorplanning strategy:
-# we try to floorplan each region on a separate row of the fpgaMatrix.
-# If the region does not fit into the FPGA row currently considered or
+# we try to floorplan each region on a separate set of rows of the fpgaMatrix.
+# If the region does not fit into the FPGA rows currently considered or
 # if there are not enough FPGA rows to store all the regions, the floorplan
 # will fail.
+#
+# To simplify the floorplanner, we assume that all the regions are partially 
+# reconfigurable. Indeed, the constraints for Partially Reconfigurable 
+# Regions (PRRs) are more strict than the ones for static regions. With this 
+# strategy, we can simplify the algorithm (at the cost of a potential loss 
+# in the quality of the floorplan).
+# We do the floorplanning of the PRRs considering TH rows at time. In this
+# fashion, we gurantee that every region covers its own frames (again, 
+# at the cost of losing some area optimizations).
+#
 # Notice also that this strategy does not take into account the 
 # interconnections between the regions and it is not performing any 
 # optimization with respect to the given objective function.
 for n in range(N):
-	# Try to place region n at row r of the FPGA matrix.
+	# Try to place region n at row r * TH of the FPGA matrix.
 	if n >= R:
 		# Not enough rows, fail floorplan.
 		floorplan = []
 		break
-	startRow = n;
+	startRow = n * TH;
 
 	# Places the current region at the first valid left column.
 	# NOTE: a valid left column must exist.
@@ -154,17 +207,19 @@ for n in range(N):
 			break
 
 	# The region starts at row 'startRow' and column 'startColumn',
-	# covers 1 row and extends for (endColumn - startColumn + 1) columns.
-	height = 1
+	# covers TH rows and extends for (endColumn - startColumn + 1) columns.
+	height = TH
 	width = endColumn - startColumn + 1
+	endRow = startRow + height - 1
 
 	# Computes the number of tiles covered by this region for each tile type.
 	coveredTiles = {
 		'C' : 0, 'B' : 0, 'D' : 0, '-' : 0, 'F' : 0
 	}
-	for c in range(startColumn, endColumn + 1):
-		tileType = fpgaMatrix[startRow][c]
-		coveredTiles[tileType] += 1
+	for r in range(startRow, endRow + 1):
+		for c in range(startColumn, endColumn + 1):
+			tileType = fpgaMatrix[r][c]
+			coveredTiles[tileType] += 1
 
 	# Checks that the region does not cover any forbidden tile, otherwise fail
 	# the floorplan.
