@@ -1,0 +1,13 @@
+10001
+10000 20 10
+1 1 1
+2 29
+C C C B C C D C C - C C C C - C C B C C C D C C B C C C C
+C C C B C C D C C - C C C C - C C B C C C D C C B C C C C
+0 1 0 1 0 1 0 1 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0
+1 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 1
+2
+5 2 2
+16 0 0
+0 0
+0 10
