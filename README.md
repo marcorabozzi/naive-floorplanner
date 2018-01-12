@@ -22,7 +22,7 @@ python solve-all.py
 The script will loop over all the problem files, run the floorplanner on each of them and store the final results in the *solutions* folder.
 
 We suggest to use the following workflow for the floorplanning design contest:
-1. download all problems from http://floorplanning-contest.necst.it/ and save them in the ./problems folder
+1. download all problems from http://raw-floorplanning-contest.necst.it/ and save them in the ./problems folder
 2. Modify floorplan.py with your floorplanning algorithm *or* write your own floorplanner in a different programming language (in this case you might still leverage the solve-all.py script with minor changes to the Popen command)
 3. Run python solve-all.py
 4. Verify that all the solutions to the problems have been generated in the folder ./solutions
