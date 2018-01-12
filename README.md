@@ -2,7 +2,7 @@
 
 This is an example of a simple floorplanning algorithm for FPGA designs written in python.
 It is meant to be a starting point for more complex algorithms to be developed in the context
-of the [HSA Floorplanning Design Contest](http://floorplanning-contest.necst.it/).
+of the [RAW Floorplanning Design Contest](http://raw-floorplanning-contest.necst.it/).
 
 In order to run the floorplanner you need python version 2.7 or 3.x installed in your system.
 To execute the floorplanner run:
@@ -28,5 +28,5 @@ We suggest to use the following workflow for the floorplanning design contest:
 4. Verify that all the solutions to the problems have been generated in the folder ./solutions
 5. Zip folder ./solutions
 6. Zip your floorplanner source code
-7. Submit both the solution archive and the code archive to http://caos-fpl-contest.necst.it/
+7. Submit both the solution archive and the code archive to http://raw-floorplanning-contest.necst.it/
 8. The solutions will be validated online, check the score of your submission and possible violeted constraints on the website
