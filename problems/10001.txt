@@ -2,7 +2,7 @@
 23520 20 10
 3 3 3
 10 31
-5
+5 2 5
 - C C C B C C D C C - C C C C - C C B C C C D C C B C C C C -
 - C C C B C C D C C - C C C C - C C B C C C D C C B C C C C -
 - C C C B C C D C C - C C C C - C C B C C C D C C B C C C C -

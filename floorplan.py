@@ -36,9 +36,11 @@ problemId = int(input())
 # #DSP = total number of DSP tiles covered by all regions
 # #BRAM = total number of BRAM tiles covered by all regions
 #
-# wirelength = SUM ( wires_i_j * ( |cx_i - cx_j| + |cy_i - cy_j| ) )
+# wirelength = SUM ( wires_i_j * ( |cx_i - cx_j| * Bw + |cy_i - cy_j| * Bh) )
 # cx = x coordinate of region center = start_column + covered_columns/2
 # cy = y coordinate of region center = start_row + covered_rows/2
+# Bw = Block width (see next comments)
+# Bh = Block height (see next comments)
 #
 # read P, Aw, Ww, CLBw, BRAMw and DSPw
 P, Aw, Ww = [int(val) for val in input().split(' ')]
@@ -50,7 +52,11 @@ R, C = [int(val) for val in input().split(' ')]
 
 # TH = Tile height: the number of tiles contained within a clock region on the
 # vertical direction
-TH = int(input())
+# Bw = Block width: width of a FPGA block used to estimate distances on the 
+# horizontal direction
+# Bh = Block height: height of a FPGA block used to estimate distances on the 
+# vertical direction
+TH, Bw, Bh = [int(val) for val in input().split(' ')]
 
 # The FPGA matrix is composed of R rows and C columns.
 # Each entry/tile of the FPGA matrix is a single character with the following 
